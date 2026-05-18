@@ -35,4 +35,10 @@ Modifies the battle mode item probability curve stored in the common data MIO0-c
 
 ---
 
+## Screenshots
+![Beschreibung](Screenshot1.png)
+![Beschreibung](Screenshot2.png)
+![Beschreibung](Screenshot3.png)
+
+---
 
