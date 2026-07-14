@@ -80,3 +80,27 @@ Note: The header CRC was not recalculated (the Wii VC ROM has no standard CRC an
 
 ---
 
+# Patch 3: Shrink Duration ~30 Seconds
+
+| Field | Value |
+|-------|-------|
+| Patch file | `mk64_eu_shrink_timer_30s.ips` — apply on top of `rom_battle_v2.z64` |
+| Complete patch | `mk64_eu_battle_v3_komplett.ips` — item curve + lightning + timer, apply to a clean EU ROM |
+| Result ROM | `rom_battle_v3.z64` — everything included, ready to play (CRC recalculated: `B5ADCEF9 F73D28E9`) |
+
+## Behavior
+
+The shrunken state after a lightning strike lasts 1500 frames instead of 460 (`0x5DC` instead of `0x1CC`) — about 30 seconds. Live testing showed the timer ticks at ~50/s (PAL vsync rate), not at the logic frame rate: 750 frames measured ~15-16 s, so 1500 ≈ 30 s. Vanilla: 460 ≈ 9 s.
+
+## Technical Details (EU v1.1)
+
+| Location | ROM | RAM | Change |
+|--------|-----|-----|--------|
+| `apply_lightning_effect`: `slti $at, $v0, 0x1CC` | 0x8EEE0 | 0x8008E2E0 | immediate `0x1CC` → `0x5DC` (460 → 1500 frames) |
+
+The timer is `player + 0xB0` (s16): set to 0 on lightning strike (`0x8008DFF4`), incremented once per frame (`0x8008E280`), compared against the limit at `0x8008E2E0`. Once the limit is reached, the grow-back path (`0x8008E348`) runs. This is the only comparison against `0x1CC` in the code — same duration for all players.
+
+To verify the actual tick rate live: watch `player + 0xB0` and time how fast it counts.
+
+---
+
